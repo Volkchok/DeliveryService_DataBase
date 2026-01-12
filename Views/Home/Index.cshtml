@@ -1,0 +1,196 @@
+﻿@model PolyclinicDB.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Поликлиника - Главная страница";
+}
+
+<div class="container mt-4">
+    <h1>Система управления поликлиникой</h1>
+
+    @if (TempData["Message"] != null)
+    {
+    <div class="alert alert-success">@TempData["Message"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+    <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="row">
+        <!-- Статистика -->
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Статистика</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        <strong>Самое длинное имя пациента:</strong>
+                        @(ViewBag.LongestName ?? "Нет данных")
+                    </p>
+                    <p><strong>Всего пациентов:</strong> @(Model?.Patients?.Count() ?? 0)</p>
+                    <p><strong>Всего врачей:</strong> @(Model?.Doctors?.Count() ?? 0)</p>
+                    <p><strong>Всего записей на прием:</strong> @(Model?.Appointments?.Count() ?? 0)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Топ-10 пациентов -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Топ-10 пациентов (по убыванию ID)</h5>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.Top10Patients != null && ((IEnumerable<dynamic>)ViewBag.Top10Patients).Any())
+                    {
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>ФИО</th>
+                                <th>Дата рождения</th>
+                                <th>Адрес</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var patient in ViewBag.Top10Patients)
+                                {
+                            <tr>
+                                <td>@patient.PatientId</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(patient.FullName))
+                                            {
+                                    @patient.FullName
+                                            }
+                                            else
+                                            {
+                                    <span class="text-muted">Не указано</span>
+                                            }
+                                </td>
+                                <td>@(patient.Birthdate?.ToString("dd.MM.yyyy") ?? "Не указана")</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(patient.Address))
+                                            {
+                                    @patient.Address
+                                            }
+                                            else
+                                            {
+                                    <span class="text-muted">Не указан</span>
+                                            }
+                                </td>
+                            </tr>
+                                }
+                        </tbody>
+                    </table>
+                    }
+                    else
+                    {
+                    <div class="alert alert-info">
+                        <p>Пациенты не найдены. База данных может быть пустой.</p>
+                        <p>Попробуйте добавить пациента через форму ниже.</p>
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Форма добавления пациента -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Добавить нового пациента</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-action="AddPatient" asp-controller="Home">
+                        <div class="mb-3">
+                            <label class="form-label">ФИО *</label>
+                            <input type="text" class="form-control" name="fullName" required
+                                   placeholder="Иванов Иван Иванович">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Дата рождения *</label>
+                            <input type="date" class="form-control" name="birthdate" required
+                                   max="@DateTime.Today.ToString("yyyy-MM-dd")">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Адрес</label>
+                            <textarea class="form-control" name="address" rows="2"
+                                      placeholder="Москва, ул. Примерная, д. 1, кв. 1"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Паспорт *</label>
+                            <input type="text" class="form-control" name="passport" required
+                                   placeholder="4510 123456" pattern="\d{4}\s?\d{6}">
+                            <small class="form-text text-muted">Формат: 4510 123456</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Полис *</label>
+                            <input type="text" class="form-control" name="policy" required
+                                   placeholder="1234567890123456" pattern="\d{16}">
+                            <small class="form-text text-muted">16 цифр</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Добавить пациента</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Форма создания записи на прием -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Запись на прием</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-action="CreateAppointment" asp-controller="Home">
+                        <div class="mb-3">
+                            <label class="form-label">Пациент *</label>
+                            <select class="form-control" name="patientId" required>
+                                <option value="">-- Выберите пациента --</option>
+                                @if (Model?.Patients != null)
+                                {
+                                @foreach (var patient in Model.Patients)
+                                    {
+                                <option value="@patient.PatientId">@patient.FullName (ID: @patient.PatientId)</option>
+                                    }
+                                }
+                                <option value="1">Иванов Иван Иванович (ID: 1)</option>
+                                <option value="2">Петрова Мария Сергеевна (ID: 2)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Врач *</label>
+                            <select class="form-control" name="doctorId" required>
+                                <option value="">-- Выберите врача --</option>
+                                @if (Model?.Doctors != null)
+                                {
+                                @foreach (var doctor in Model.Doctors)
+                                    {
+                                <option value="@doctor.DoctorId">@doctor.FullName - @doctor.Specialization</option>
+                                    }
+                                }
+                                <option value="1">Иванов Петр Сергеевич (Терапевт)</option>
+                                <option value="2">Сидорова Анна Владимировна (Хирург)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Дата и время приема *</label>
+                            <input type="datetime-local" class="form-control" name="appointmentDate" required
+                                   min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Жалобы</label>
+                            <textarea class="form-control" name="complaints" rows="3"
+                                      placeholder="Опишите симптомы и жалобы пациента"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Записать на прием</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,138 @@
+@model PolyclinicDB.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Регистрация";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-center">Регистрация в системе</h3>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Register" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Username" class="form-label"></label>
+                                    <input asp-for="Username" class="form-control" placeholder="Введите имя пользователя" />
+                                    <span asp-validation-for="Username" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Email" class="form-label"></label>
+                                    <input asp-for="Email" class="form-control" placeholder="Введите email" />
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Password" class="form-label"></label>
+                                    <input asp-for="Password" class="form-control" placeholder="Введите пароль" />
+                                    <span asp-validation-for="Password" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="ConfirmPassword" class="form-label"></label>
+                                    <input asp-for="ConfirmPassword" class="form-control" placeholder="Повторите пароль" />
+                                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="AccountType" class="form-label"></label>
+                                    <select asp-for="AccountType" class="form-control" id="accountType">
+                                        <option value="">-- Выберите тип аккаунта --</option>
+                                        <option value="patient">Пациент</option>
+                                        <option value="doctor">Врач</option>
+                                        <option value="admin">Администратор</option>
+                                    </select>
+                                    <span asp-validation-for="AccountType" class="text-danger"></span>
+                                </div>
+
+                                <!-- Поля для пациентов -->
+                                <div id="patientFields" style="display: none;">
+                                    <div class="mb-3">
+                                        <label asp-for="FullName" class="form-label"></label>
+                                        <input asp-for="FullName" class="form-control" placeholder="Введите ФИО" />
+                                        <span asp-validation-for="FullName" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label asp-for="Birthdate" class="form-label"></label>
+                                        <input asp-for="Birthdate" class="form-control" type="date" />
+                                        <span asp-validation-for="Birthdate" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <!-- Поля для врачей -->
+                                <div id="doctorFields" style="display: none;">
+                                    <div class="mb-3">
+                                        <label asp-for="FullName" class="form-label"></label>
+                                        <input asp-for="FullName" class="form-control" placeholder="Введите ФИО врача" />
+                                        <span asp-validation-for="FullName" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label asp-for="Specialization" class="form-label"></label>
+                                        <input asp-for="Specialization" class="form-control" placeholder="Введите специализацию" />
+                                        <span asp-validation-for="Specialization" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label asp-for="LicenseNumber" class="form-label"></label>
+                                        <input asp-for="LicenseNumber" class="form-control" placeholder="Введите номер лицензии" />
+                                        <span asp-validation-for="LicenseNumber" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <!-- Поля для администраторов -->
+                                <div id="adminFields" style="display: none;">
+                                    <div class="alert alert-info">
+                                        <p>Для регистрации администратора требуется подтверждение существующего администратора.</p>
+                                        <p>Обратитесь к системному администратору.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success">Зарегистрироваться</button>
+                        </div>
+
+                        <div class="mt-3 text-center">
+                            <p>Уже есть аккаунт? <a asp-action="Login">Войти</a></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        document.getElementById('accountType').addEventListener('change', function() {
+            var selected = this.value;
+
+            // Скрываем все поля
+            document.getElementById('patientFields').style.display = 'none';
+            document.getElementById('doctorFields').style.display = 'none';
+            document.getElementById('adminFields').style.display = 'none';
+
+            // Показываем нужные поля
+            if (selected === 'patient') {
+                document.getElementById('patientFields').style.display = 'block';
+            } else if (selected === 'doctor') {
+                document.getElementById('doctorFields').style.display = 'block';
+            } else if (selected === 'admin') {
+                document.getElementById('adminFields').style.display = 'block';
+            }
+        });
+    </script>
+}

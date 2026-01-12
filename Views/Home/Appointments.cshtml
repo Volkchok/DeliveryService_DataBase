@@ -1,0 +1,44 @@
+@model IEnumerable<PolyclinicDB.Services.AppointmentDetails>
+@{
+    ViewData["Title"] = "Детали приёмов";
+}
+
+<div class="container mt-4">
+    <h1>Детали приёмов за последние 30 дней</h1>
+    
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Пациент</th>
+                        <th>Возраст</th>
+                        <th>Врач</th>
+                        <th>Специализация</th>
+                        <th>Дата приема</th>
+                        <th>Жалобы</th>
+                        <th>Диагноз</th>
+                        <th>Назначение</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var detail in Model)
+                    {
+                        <tr>
+                            <td>@detail.PatientName</td>
+                            <td>@detail.PatientAge лет</td>
+                            <td>@detail.DoctorName</td>
+                            <td>@detail.Specialization</td>
+                            <td>@detail.AppointmentDate.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>@detail.Complaints</td>
+                            <td>@detail.Diagnosis</td>
+                            <td>@detail.Prescription</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <a href="/" class="btn btn-secondary mt-3">На главную</a>
+</div>
